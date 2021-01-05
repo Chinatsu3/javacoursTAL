@@ -1,5 +1,7 @@
 package projet.ChinatsuLaraXinyi.traitementTextes.bibliotheque;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -91,20 +93,26 @@ public class BibliothecaireEmprunt extends Bibliothecaire{
 	 }
 	 
 	 /**
-	* Lister nombre de Livres Empruntes Pour Un Auteur
-	* @param auteur
-	* @return String 
-	*/  
-	 public String listerNbLivresEmpruntesPourUnAuteur(Auteur auteur){
-		int count = 0;
-		ArrayList <Emprunt> listeEmprunts = getListeEmprunts();
-		for (Emprunt emprunt : listeEmprunts) {
-			if (emprunt.getLivre().getAuteur().equals(auteur)) {
-					count +=1;
-			}
-		}
-		return (count +" livre(s) emprunté(s) pour "+ auteur.getNom()); 
-	 }
+	  * Lister nombre de Livres Empruntes Pour Un Auteur
+	  * @param auteur
+	  * @return String 
+	  * @throws AuteurInvalideException
+	 w */  
+	     public String listerNbLivresEmpruntesPourUnAuteur(Auteur auteur) throws AuteurInvalideException {
+	        if (getCatalogue().containsKey(auteur)) {
+	            int count = 0;
+	            
+	            ArrayList <Emprunt> listeEmprunts = getListeEmprunts();
+	            for (Emprunt emprunt : listeEmprunts) {
+	                if (emprunt.getLivre().getAuteur().equals(auteur)) {
+	                        count +=1;
+	                }
+	            }
+	            return (count +" livre(s) emprunté(s) pour "+ auteur.getNom()); 
+	        } else {
+	            throw new AuteurInvalideException("L'auteur n'est pas dans le catalogue");
+	        }
+	     }
 	 
 	 /**
 	* Envoyer Amende Retardaire
@@ -118,10 +126,10 @@ public class BibliothecaireEmprunt extends Bibliothecaire{
 		ArrayList <Emprunt> listeEmprunts = getListeEmprunts();
 		for (Emprunt emprunt : listeEmprunts) {
 			if ((emprunt.getDateRetourne().equals("0000-00-00")) && sdf.format(emprunt.getDateDelais()).compareTo(sdf.format(calobj.getTime())) < 0){	 
-				 long from1 = calobj.getTime().getTime();  
-				 long to1 = emprunt.getDateDelais().getTime();  
-				 int days = (int) ((to1 - from1) / (1000 * 60 * 60 * 24));  
-				 amende = days*2; 
+				 long from1 = calobj.getTime().getTime();  //date d'aujourd'hui
+				 long to1 = emprunt.getDateDelais().getTime();  //date de delais pour retrouner un livre
+				 int days = (int) ((to1 - from1) / (1000 * 60 * 60 * 24));  //Calculer la difference de entre ces jours et convertir les mille-secondes aux jours
+				 amende = days*2; //amende = par jours * 2euros
 				 emprunt.setAmende(Math.abs(amende));
 				 listAmende.put(emprunt, Math.abs(amende));
 		 }
